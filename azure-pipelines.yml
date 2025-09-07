@@ -1,8 +1,3 @@
-# Node.js with React
-# Build a Node.js project that uses React.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
 - main
 
@@ -17,24 +12,25 @@ variables:
 steps:
 - checkout: self
 
-# Build the docker image on the agent
 - script: |
-    echo "Build Docker image..."
-    docker build -t $(appName):$(imageTag) .
+    set -e
+    echo "Building Docker image..."
+    docker build --progress=plain -t $(appName):$(imageTag) .
   displayName: Build Docker image
 
 - script: |
-    echo "Stopping ald container (if any)..."
+    set -e
+    echo "Stopping old container (if any)..."
     docker rm -f $(appName) || true
-    
+
     echo "Starting new container..."
     docker run -d --name $(appName) \
       -p $(appPort):80 \
       --restart unless-stopped \
-      $(appName):$(Build.Build)
+      $(appName):$(imageTag)
 
     echo "Health check..."
-    (curl -fsS http://localhost:$(appPort) || wget -qO- http://localhost:$(appPort) | head -n1
+    (curl -fsS http://localhost:$(appPort) || wget -qO- http://localhost:$(appPort)) | head -n1
 
     echo "ps:"
     docker ps --filter name=$(appName)
