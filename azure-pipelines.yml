@@ -12,6 +12,7 @@ pool:
 variables:
   appName: react-hello
   appPort: '8080'
+  imageTag: $(Build.BuildId)
 
 steps:
 - checkout: self
@@ -19,7 +20,7 @@ steps:
 # Build the docker image on the agent
 - script: |
     echo "Build Docker image..."
-    docker build -t $(appName):$(Build.Build) .
+    docker build -t $(appName):$(imageTag) .
   displayName: Build Docker image
 
 - script: |
@@ -33,5 +34,8 @@ steps:
       $(appName):$(Build.Build)
 
     echo "Health check..."
-    curl -fsS http://localhost:$(appPort) | head -n1
+    (curl -fsS http://localhost:$(appPort) || wget -qO- http://localhost:$(appPort) | head -n1
+
+    echo "ps:"
+    docker ps --filter name=$(appName)
   displayName: Run container and health check
