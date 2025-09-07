@@ -9,13 +9,29 @@ trigger:
 pool:
   name: Default
 
+variables:
+  appName: react-hello
+  appPort: '8080'
+
 steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '20.x'
-  displayName: 'Install Node.js'
+- checkout: self
+
+# Build the docker image on the agent
+- script: |
+    echo "Build Docker image..."
+    docker build -t $(appName):$(Build.Build) .
+  displayName: Build Docker image
 
 - script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+    echo "Stopping ald container (if any)..."
+    docker rm -f $(appName) || true
+    
+    echo "Starting new container..."
+    docker run -d --name $(appName) \
+      -p $(appPort):80 \
+      --restart unless-stopped \
+      $(appName):$(Build.Build)
+
+    echo "Health check..."
+    curl -fsS http://localhost:$(appPort) | head -n1
+  displayName: Run container and health check
