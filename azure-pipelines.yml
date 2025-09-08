@@ -36,6 +36,9 @@ steps:
     set -e
     [ -n "${AZURE_STATIC_WEB_APPS_API_TOKEN:-}" ] || { echo "Missing AZURE_STATIC_WEB_APPS_API_TOKEN"; exit 1; }
   displayName: Check secrets present
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  env:
+    AZURE_STATIC_WEB_APPS_API_TOKEN: $(AZURE_STATIC_WEB_APPS_API_TOKEN)
 
 - script: |
     set -e
