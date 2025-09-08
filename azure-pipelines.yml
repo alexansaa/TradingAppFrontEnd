@@ -42,4 +42,3 @@ steps:
     app_location: $(app_location)
     output_location: $(output_location)
     deployment_environment: 'production'
-nment: 'production'
