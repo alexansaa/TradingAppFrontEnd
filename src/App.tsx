@@ -7,6 +7,20 @@ import { API_BASE_URL } from "./config";
 
 function App() {
   const [count, setCount] = useState(0)
+  const [pingResult, setPingResult] = useState<string>('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handlePing = async () => {
+    setIsLoading(true)
+    try {
+      const result = await getPublicPing()
+      setPingResult(JSON.stringify(result, null, 2))
+    } catch (error) {
+      setPingResult(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <>
@@ -24,6 +38,15 @@ function App() {
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
+        <br />
+        <button onClick={handlePing} disabled={isLoading}>
+          {isLoading ? 'Pinging...' : 'Test Public Ping'}
+        </button>
+        {pingResult && (
+          <pre style={{ textAlign: 'left', marginTop: '1rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px', fontSize: '0.8rem' }}>
+            {pingResult}
+          </pre>
+        )}
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
