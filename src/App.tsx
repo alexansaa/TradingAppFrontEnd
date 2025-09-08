@@ -16,6 +16,7 @@ function App() {
       const result = await getPublicPing()
       setPingResult(JSON.stringify(result, null, 2))
     } catch (error) {
+      console.log(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setPingResult(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setIsLoading(false)
@@ -59,7 +60,7 @@ function App() {
 }
 
 export async function getPublicPing() {
-  const r = await fetch(`${API_BASE_URL}/api/public/ping`);
+  const r = await fetch(`${API_BASE_URL}/api/hello`);
   if (!r.ok) throw new Error(`Ping failed: ${r.status}`);
   return r.json();
 }
