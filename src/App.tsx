@@ -3,6 +3,8 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
+import { API_BASE_URL } from "./config";
+
 function App() {
   const [count, setCount] = useState(0)
 
@@ -31,6 +33,12 @@ function App() {
       </p>
     </>
   )
+}
+
+export async function getPublicPing() {
+  const r = await fetch(`${API_BASE_URL}/api/public/ping`);
+  if (!r.ok) throw new Error(`Ping failed: ${r.status}`);
+  return r.json();
 }
 
 export default App
