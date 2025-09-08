@@ -1,37 +1,45 @@
 trigger:
 - main
+pr:
+- '*'
 
 pool:
   name: Default
 
 variables:
-  appName: react-hello
-  appPort: '8080'
-  imageTag: $(Build.BuildId)
+  app_location: '/'
+  output_location: 'dist'
 
 steps:
 - checkout: self
 
-- script: |
-    set -e
-    echo "Building Docker image..."
-    docker build --progress=plain -t $(appName):$(imageTag) .
-  displayName: Build Docker image
+- task: NodeTool@0
+  inputs:
+    versionSpec: '20.x'
+  displayName: Use Node 20
+
+- task: Cache@2
+  displayName: Cache npm
+  inputs:
+    key: 'npm | "$(Agent.OS)" | package-lock.json'
+    path: $(Pipeline.Workspace)/.npm
 
 - script: |
     set -e
-    echo "Stopping old container (if any)..."
-    docker rm -f $(appName) || true
+    npm config set cache "$(Pipeline.Workspace)/.npm" --global
+    npm ci
+    npm run build
+  displayName: Build SPA
+  env:
+    VITE_API_BASE_URL: $(VITE_API_BASE_URL)
 
-    echo "Starting new container..."
-    docker run -d --name $(appName) \
-      -p $(appPort):80 \
-      --restart unless-stopped \
-      $(appName):$(imageTag)
-
-    echo "Health check..."
-    (curl -fsS http://localhost:$(appPort) || wget -qO- http://localhost:$(appPort)) | head -n1
-
-    echo "ps:"
-    docker ps --filter name=$(appName)
-  displayName: Run container and health check
+# ---- Production deploy (main branch) ----
+- task: AzureStaticWebApp@0
+  displayName: Deploy to SWA (production)
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  inputs:
+    azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN)
+    app_location: $(app_location)
+    output_location: $(output_location)
+    deployment_environment: 'production'
+nment: 'production'
