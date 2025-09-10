@@ -72,14 +72,12 @@ export async function ensureSignedIn(): Promise<AccountInfo> {
   if (acc) return acc;
 
   // First-time login
-  console.log("redirecting login");
+  console.log("popup login");
   
-  await msal.loginRedirect(loginRequest);
-  // Execution will continue after redirect
-  console.log("first time login redirecting");
+  const result = await msal.loginPopup(loginRequest);
+  console.log("first time login popup completed");
   
-//   return new Promise((_resolve) => {}); // noop; page will reload
-  return new Promise(() => {}); // redirect, never resolves
+  return result.account;
 }
 
 export async function acquireApiToken(): Promise<string> {
@@ -95,11 +93,10 @@ export async function acquireApiToken(): Promise<string> {
     return res.accessToken;
   } catch (e) {
     if (e instanceof InteractionRequiredAuthError) {
-      console.log("error, acquire token redirect");
+      console.log("error, acquire token popup");
       
-      await msal.acquireTokenRedirect(tokenRequest(account));
-    //   return new Promise((_resolve) => {}); // redirect flow
-    return new Promise(() => {}); // redirect
+      const result = await msal.acquireTokenPopup(tokenRequest(account));
+      return result.accessToken;
     }
     throw e;
   }
