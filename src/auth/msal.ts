@@ -15,7 +15,7 @@ export const apiScope =
 export const msal = new PublicClientApplication({
   auth: {
     clientId,
-    authority: `https://${tenantHost}/${tenantDomain}/v2.0`, // NOTE: no /v2.0 here for SPA authority
+    authority: `https://${tenantHost}/${tenantDomain}`,
     knownAuthorities,
     redirectUri,
     postLogoutRedirectUri: redirectUri
