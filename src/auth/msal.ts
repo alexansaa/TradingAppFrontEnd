@@ -41,60 +41,34 @@ const logoutRequest = (account?: AccountInfo) => ({
 });
 
 export async function initMsal(): Promise<void> {
-  console.log("AUTHORITY_BASE:", `https://${tenantHost}/${tenantDomain}/v2.0`);             // https://login.smartpowerai.org/smartpowerai.onmicrosoft.com
-  console.log("knownAuthorities:", knownAuthorities);         // ["login.smartpowerai.org"]
-
   await msal.initialize();
-  console.log("handling redirect promise");
-  
   await msal.handleRedirectPromise().catch(() => {});
-  console.log("getting all accounts");
-  
   const accs = msal.getAllAccounts();
-  console.log("setting active accounts");
   
   if (accs.length && !msal.getActiveAccount()) msal.setActiveAccount(accs[0]);
 }
 
 export function getActiveAccount(): AccountInfo | null {
-  console.log("getting active account");
-  
   const accs = msal.getAllAccounts();
-  console.log("got active account");
-
   return accs.length ? accs[0] : null;
 }
 
 export async function ensureSignedIn(): Promise<AccountInfo> {
-  console.log("into ensure signed in - getting active account");
-  
   const acc = getActiveAccount();
   if (acc) return acc;
-
-  // First-time login
-  console.log("popup login");
-  
   const result = await msal.loginPopup(loginRequest);
-  console.log("first time login popup completed");
-  
   return result.account;
 }
 
 export async function acquireApiToken(): Promise<string> {
-  console.log("into acquireApiToken - getting active account");
-  
   const account = getActiveAccount();
   if (!account) throw new Error("No active account");
 
   try {
-    console.log("acquiring token silent");
-    
     const res = await msal.acquireTokenSilent(tokenRequest(account));
     return res.accessToken;
   } catch (e) {
     if (e instanceof InteractionRequiredAuthError) {
-      console.log("error, acquire token popup");
-      
       const result = await msal.acquireTokenPopup(tokenRequest(account));
       return result.accessToken;
     }
@@ -110,13 +84,8 @@ export async function logout() {
 
 // (Optional) keep the first signed-in account as "active"
 msal.addEventCallback((ev) => {
-  console.log("into msal event callback: ");
-  console.log(ev);
-  
-  
   if (ev.eventType === EventType.LOGIN_SUCCESS && ev.payload && "account" in ev.payload) {
     const acc = (ev.payload as any).account as AccountInfo;
-    console.log("seting active account from event callback");
     
     msal.setActiveAccount(acc);
   }
