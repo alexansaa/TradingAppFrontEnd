@@ -1,3 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-coral: #ff5851;
+  --color-gold: #f3c130;
+  --color-slate-blue: #414a6b;
+  --color-dark: #1c1b20;
+  --color-tan: #b49a85;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
