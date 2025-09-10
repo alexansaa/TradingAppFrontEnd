@@ -25,16 +25,24 @@ export default function App() {
   useEffect(() => {
     (async () => {
       // await handleRedirect();                // handle MSAL redirect result (if returning from B2C)
+      console.log("getting active account");
+      
       setIsAuth(!!getActiveAccount());       // authenticated if we have an account
+      console.log("set is auth");
       setAuthReady(true);
+      console.log("set is auth ready");
     })();
   }, []);
 
   // When authenticated, load data
   useEffect(() => {
     if (!isAuth) return;
+    console.log("user auth and load data");
     getPublicPing().then(setPing).catch(console.error);
+    console.log("already pigned public");
     getProfile().then(setProfile).catch(console.error);
+    console.log("progile obtained");
+
   }, [isAuth]);
 
   // const signIn = async () => {
