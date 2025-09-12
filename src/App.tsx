@@ -35,9 +35,13 @@ export default function App() {
 
   // Process B2C redirect (if any) and detect auth
   useEffect(() => {
+    console.log("app setisauth usereffect");
+    
     (async () => {
       setIsAuth(!!getActiveAccount());       // authenticated if we have an account
       setAuthReady(true);
+      console.log("acquiring api token");
+      
       acquireApiToken();
     })();
   }, []);

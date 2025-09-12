@@ -3,7 +3,14 @@ import { acquireApiToken } from "./auth/msal";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export async function getPublicPing() {
-  const r = await fetch(`${API_BASE_URL}/api/hello`);
+  const token = await acquireApiToken();
+  console.log("gotten toke:");
+  console.log(token);
+  
+  
+  const r = await fetch(`${API_BASE_URL}/api/hello`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
   if (!r.ok) throw new Error(`Ping failed: ${r.status}`);
   return r.json();
 }
