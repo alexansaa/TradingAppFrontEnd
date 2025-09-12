@@ -9,6 +9,7 @@ import "./App.css";
 // MSAL helpers (from the earlier snippet you added in src/auth/msal.ts)
 // import { msal, apiScope, getActiveAccount, logout } from "./auth/msal";
 import {
+  acquireApiToken,
   getActiveAccount,
   // logout
 } from "./auth/msal";
@@ -37,6 +38,7 @@ export default function App() {
     (async () => {
       setIsAuth(!!getActiveAccount());       // authenticated if we have an account
       setAuthReady(true);
+      acquireApiToken();
     })();
   }, []);
 

@@ -44,6 +44,8 @@ export async function initMsal(): Promise<void> {
   await msal.initialize();
   await msal.handleRedirectPromise().catch(() => {});
   const accs = msal.getAllAccounts();
+  console.log("Accounts");
+  console.log(accs);
   
   if (accs.length && !msal.getActiveAccount()) msal.setActiveAccount(accs[0]);
 }
@@ -57,15 +59,24 @@ export async function ensureSignedIn(): Promise<AccountInfo> {
   const acc = getActiveAccount();
   if (acc) return acc;
   const result = await msal.loginPopup(loginRequest);
+  msal.setActiveAccount(result.account);
   return result.account;
 }
 
 export async function acquireApiToken(): Promise<string> {
+  console.log("acquiring token");
+  
   const account = getActiveAccount();
   if (!account) throw new Error("No active account");
 
   try {
+    console.log("about to call acquireTokenSilent");
+    
     const res = await msal.acquireTokenSilent(tokenRequest(account));
+    console.log("aquired tokens:");
+    console.log(res.accessToken);
+    
+    
     return res.accessToken;
   } catch (e) {
     if (e instanceof InteractionRequiredAuthError) {
