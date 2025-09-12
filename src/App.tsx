@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-// import { getPublicPing, getProfile } from "./api";
+import {
+  getPublicPing,
+  // getProfile
+} from "./api";
 import "./App.css";
 // import { API_BASE_URL } from "./config";
 
@@ -26,8 +29,8 @@ export default function App() {
 
   // // demo stuff for the default Vite page
   // const [count, setCount] = useState(0);
-  // const [pingResult, setPingResult] = useState("");
-  // const [isLoading, setIsLoading] = useState(false);
+  const [pingResult, setPingResult] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Process B2C redirect (if any) and detect auth
   useEffect(() => {
@@ -49,19 +52,19 @@ export default function App() {
   //   await logout();
   // };
 
-  // const handlePing = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const result = await getPublicPing();
-  //     setPingResult(JSON.stringify(result, null, 2));
-  //   } catch (error) {
-  //     const msg = error instanceof Error ? error.message : "Unknown error";
-  //     console.error(`Error: ${msg}`);
-  //     setPingResult(`Error: ${msg}`);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
+  const handlePing = async () => {
+    setIsLoading(true);
+    try {
+      const result = await getPublicPing();
+      setPingResult(JSON.stringify(result, null, 2));
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Unknown error";
+      console.error(`Error: ${msg}`);
+      setPingResult(`Error: ${msg}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Optional loading placeholder while MSAL processes the redirect hash
   if (!authReady) return null;
@@ -140,6 +143,27 @@ export default function App() {
             </div>
           </div>
         </header>
+
+        <button onClick={handlePing} disabled={isLoading}>
+          {isLoading ? "Pinging..." : "Test Public Ping"}
+        </button>
+
+        <br />
+
+        {pingResult && (
+          <pre
+            style={{
+              textAlign: "left",
+              marginTop: "1rem",
+              padding: "1rem",
+              backgroundColor: "#f5f5f5",
+              borderRadius: "4px",
+              fontSize: "0.8rem",
+            }}
+          >
+            {pingResult}
+          </pre>
+        )}
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* Price Chart */}
