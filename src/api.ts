@@ -8,9 +8,10 @@ export async function getPublicPing() {
   headers.set("Authorization", `Bearer ${token}`);
   headers.set("Accept", "application/json");
   
-  console.log(`Fetching: ${API_BASE_URL}/api/hello`);
+  console.log(`Fetching: ${API_BASE_URL}`);
   
-  const res = await fetch(`${API_BASE_URL}/api/hello`, { headers });
+  // const res = await fetch(`${API_BASE_URL}/api/hello`, { headers });
+  const res = await fetch(`https://javasimpleapi.smartpowerai.org/api/hello`, { headers });
   // Optional: better messages
   if (res.status === 401) throw new Error("Unauthorized (401) – token missing/invalid/expired");
   if (res.status === 403) throw new Error("Forbidden (403) – token lacks required scope");
