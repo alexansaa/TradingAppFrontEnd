@@ -3,7 +3,8 @@ import axios from 'axios';
 import type { RootState } from '../store';
 // import { v4 as uuid4 } from 'uuid';
 
-const url = 'http://localhost:18080';
+// const url = 'http://localhost:18080';
+const url = 'https://pythontest.smartpowerai.org';
 
 interface PricesState {
   prices: PriceBar[];
