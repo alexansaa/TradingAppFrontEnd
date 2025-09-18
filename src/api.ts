@@ -10,7 +10,7 @@ export async function getPublicPing() {
   
   console.log(`Fetching: ${API_BASE_URL}/api/hello`);
   
-  const res = await fetch(`http://localhost:8080/api/hello`, { headers });
+  const res = await fetch(`${API_BASE_URL}/api/hello`, { headers });
   // Optional: better messages
   if (res.status === 401) throw new Error("Unauthorized (401) – token missing/invalid/expired");
   if (res.status === 403) throw new Error("Forbidden (403) – token lacks required scope");
