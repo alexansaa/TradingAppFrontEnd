@@ -9,6 +9,8 @@ import "./App.css";
 // MSAL helpers (from the earlier snippet you added in src/auth/msal.ts)
 // import { msal, apiScope, getActiveAccount, logout } from "./auth/msal";
 import {
+  initMsal,
+  ensureSignedInRedirect,
   acquireApiToken,
   getActiveAccount,
   // logout
@@ -34,17 +36,44 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Process B2C redirect (if any) and detect auth
+
+  // direct login
   useEffect(() => {
-    console.log("app setisauth usereffect");
-    
     (async () => {
-      setIsAuth(!!getActiveAccount());       // authenticated if we have an account
+      // 1) Initialize MSAL and process any incoming redirect hash
+      await initMsal();
+
+      // 2) If not logged in, this will navigate to the IdP and NOT return
+      ensureSignedInRedirect();
+
+      // 3) If we are already signed in (post-redirect or cached), reflect it
+      const hasAccount = !!getActiveAccount();
+      setIsAuth(hasAccount);
       setAuthReady(true);
-      console.log("acquiring api token");
-      
-      acquireApiToken();
+
+      // 4) Optional: warm an API token silently now (if signed in)
+      if (hasAccount) {
+        try {
+          await acquireApiToken();
+        } catch {
+          // If consent is required later, acquireApiToken() will trigger a redirect then.
+        }
+      }
     })();
   }, []);
+
+  // pop uo login
+  // useEffect(() => {
+  //   console.log("app setisauth usereffect");
+    
+  //   (async () => {
+  //     setIsAuth(!!getActiveAccount());       // authenticated if we have an account
+  //     setAuthReady(true);
+  //     console.log("acquiring api token");
+      
+  //     acquireApiToken();
+  //   })();
+  // }, []);
 
   // When authenticated, load data
   // useEffect(() => {

@@ -40,75 +40,129 @@ export async function initMsal(): Promise<void> {
   await msal.initialize();
   console.log("initialized");
 
-  await msal.handleRedirectPromise().catch(() => { });
-  console.log("redirect handled");
-
-
-
-
-
-  const accs = msal.getAllAccounts();
-
-  console.log("Accounts");
-  console.log(accs);
-  // if (accs.length && !msal.getActiveAccount()) msal.setActiveAccount(accs[0]);
-
-  const valid = msal
-    .getAllAccounts()
+  // direct login version
+  const result = await msal.handleRedirectPromise().catch(() => undefined);
+  
+  if (result?.account) {
+    msal.setActiveAccount(result.account);
+  } else {
+    // If nothing came back, prefer any cached account for this authority
+    const valid = msal.getAllAccounts()
     .filter(a => (a as any).environment?.toLowerCase() === CIAM_HOST.toLowerCase());
-
-  console.log("got accounts");
-  console.log(valid);
-
-
-
-  if (valid.length && !msal.getActiveAccount()) {
-    console.log("Accounts");
-    console.log(valid);
-
-
-    msal.setActiveAccount(valid[0]);
+    if (valid.length && !msal.getActiveAccount()) {
+      msal.setActiveAccount(valid[0]);
+    }
   }
+  
+  console.log("redirect handled");
+  
+  
+  // pop up log in
+  // await msal.handleRedirectPromise().catch(() => { });
+  // console.log("redirect handled");
+  // const accs = msal.getAllAccounts();
+
+  // console.log("Accounts");
+  // console.log(accs);
+  // // if (accs.length && !msal.getActiveAccount()) msal.setActiveAccount(accs[0]);
+
+  // const valid = msal
+  //   .getAllAccounts()
+  //   .filter(a => (a as any).environment?.toLowerCase() === CIAM_HOST.toLowerCase());
+
+  // console.log("got accounts");
+  // console.log(valid);
+
+
+
+  // if (valid.length && !msal.getActiveAccount()) {
+  //   console.log("Accounts");
+  //   console.log(valid);
+
+
+  //   msal.setActiveAccount(valid[0]);
+  // }
 
 }
 
 export function getActiveAccount(): AccountInfo | null {
-  const accs = msal.getAllAccounts();
-  return accs.length ? accs[0] : null;
+  // dierct sign in version
+  const active = msal.getActiveAccount();
+  if (active) return active;
+  const all = msal.getAllAccounts();
+  return all.length ? all[0] : null;
+
+  // pop up version
+  // const accs = msal.getAllAccounts();
+  // return accs.length ? accs[0] : null;
 }
 
-export async function ensureSignedIn(): Promise<AccountInfo> {
-  console.log("into ensureSignedIn");
 
-  const acc = getActiveAccount();
-  console.log(acc);
-
-  if (acc) return acc;
-  console.log("no acc, requesting extra query params");
-
-  if (policy) loginRequest.extraQueryParameters = { p: policy };
-
-  console.log(loginRequest);
-
-  const result = await msal.loginPopup(loginRequest);
-  msal.setActiveAccount(result.account);
-  return result.account;
+// Call once at startup to ensure the user is signed in; if not, this triggers a redirect and never returns
+export function ensureSignedInRedirect(): void {
+  const acc = msal.getActiveAccount() ?? msal.getAllAccounts()[0];
+  if (acc) return;
+  msal.loginRedirect(loginRequest);
+  // No code after this line runs on the first pass; page will reload after auth
 }
+
+// // pop up version
+// export async function ensureSignedIn(): Promise<AccountInfo> {
+//   console.log("into ensureSignedIn");
+  
+//   const acc = getActiveAccount();
+//   console.log(acc);
+
+//   if (acc) return acc;
+//   console.log("no acc, requesting extra query params");
+
+//   if (policy) loginRequest.extraQueryParameters = { p: policy };
+
+//   console.log(loginRequest);
+
+//   const result = await msal.loginPopup(loginRequest);
+//   msal.setActiveAccount(result.account);
+//   return result.account;
+// }
 
 export async function acquireApiToken(): Promise<string> {
-  const account = await ensureSignedIn();
+  // direct log in version
+  // Expect to already be signed in (call ensureSignedInRedirect() during app bootstrap)
+  const account = getActiveAccount();
   const baseReq: any = { authority: AUTHORITY, account, scopes: [apiScope] };
+
+  if (!account) {
+    // Not signed in yet; kick off redirect sign-in first
+    msal.loginRedirect(loginRequest);
+    return new Promise<never>(() => { /* never resolves; navigation occurs */ });
+  }
 
   try {
     const res = await msal.acquireTokenSilent(baseReq);
     return res.accessToken;
   } catch (e) {
     if (e instanceof InteractionRequiredAuthError) {
-      const res = await msal.acquireTokenPopup(baseReq);
-      return res.accessToken;
+      // Fall back to redirect for interactive consent/auth
+      msal.acquireTokenRedirect(baseReq);
+      return new Promise<never>(() => { /* never resolves; navigation occurs */ });
     }
     throw e;
   }
+
+  // pop up verison
+  // const account = await ensureSignedIn();
+  // const baseReq: any = { authority: AUTHORITY, account, scopes: [apiScope] };
+
+  // try {
+  //   const res = await msal.acquireTokenSilent(baseReq);
+  //   return res.accessToken;
+  // } catch (e) {
+  //   if (e instanceof InteractionRequiredAuthError) {
+  //     const res = await msal.acquireTokenPopup(baseReq);
+  //     return res.accessToken;
+  //   }
+  //   throw e;
+  // }
 }
 
 /** Optional helpers */
