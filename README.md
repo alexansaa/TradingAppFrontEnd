@@ -93,7 +93,7 @@ Start the development server:
 Verify local deployment:
 
 ```sh
-  http://localhost:5173
+  http://localhost:80
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
