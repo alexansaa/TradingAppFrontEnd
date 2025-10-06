@@ -29,6 +29,11 @@ Built with React + Vite + Tailwind CSS, this layer connects to the Java API for 
 
 The application is designed for rapid interaction, modular dashboards, and AI-driven insights, and is deployed using Azure Static Web Apps integrated with Cloudflare tunnels for secure, low-latency delivery.
 
+Other repos on the App Stack for this project:
+- [Trading App Java Layer](https://github.com/alexansaa/TradingJavaLayer)
+- [Trading App Python Layer](https://github.com/alexansaa/TradingPythonLayer)
+- [Trading App Database](https://github.com/alexansaa/Trading-db)
+
 ## 🛠 Built With <a name="built-with"></a>
 
 ### Tech Stack <a name="tech-stack"></a>
